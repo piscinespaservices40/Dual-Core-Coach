@@ -7,9 +7,19 @@ st.set_page_config(page_title="Dual-Core Coach", page_icon="💪", layout="wide"
 # Style CSS personnalisé pour un look sportif
 st.markdown("""
     <style>
-    .main { background-color: #0e1117; color: white; }
-    .stButton>button { width: 100%; border-radius: 5px; height: 3em; background-color: #ff4b4b; color: white; }
-    .stat-card { padding: 20px; border-radius: 10px; background-color: #1f2937; border: 1px solid #374151; margin-bottom: 10px; }
+    .main { background-color: #0e1117; }
+    .stat-card { 
+        padding: 20px; 
+        border-radius: 10px; 
+        background-color: #262730; 
+        border: 1px solid #464b5d; 
+        margin-bottom: 10px;
+        color: white !important; /* Force le texte en blanc */
+    }
+    .stat-card h3, .stat-card h2, .stat-card p {
+        color: white !important; /* Force tout le contenu en blanc */
+        margin: 0;
+    }
     </style>
     """, unsafe_allow_html=True)
 
