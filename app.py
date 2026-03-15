@@ -4,18 +4,25 @@ import pandas as pd
 # Configuration de la page
 st.set_page_config(page_title="Dual-Core Coach", layout="wide", initial_sidebar_state="expanded")
 
-# --- STYLE VISUEL ---
+# --- STYLE VISUEL (NOUVEAU FOND DYNAMIQUE) ---
+# J'ai ajouté un dégradé linéaire discret pour le fond
 st.markdown("""
     <style>
-    .main { background-color: #0e1117; }
+    .main { 
+        background: linear-gradient(135deg, #1e1e2f 0%, #11111d 100%); /* Fond dégradé subtil */
+        color: white;
+    }
     .stat-card { 
-        padding: 20px; border-radius: 15px; background-color: #262730; 
+        padding: 20px; border-radius: 15px; background-color: rgba(38, 39, 48, 0.8); /* Semi-transparent */
         border: 1px solid #464b5d; margin-bottom: 15px; color: white !important; text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     }
     .exercice-box {
-        background-color: #1e1e26; padding: 15px; border-left: 5px solid #00ffcc;
+        background-color: rgba(30, 30, 38, 0.9); padding: 15px; border-left: 5px solid #00ffcc;
         border-radius: 5px; margin-bottom: 10px; color: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
+    .stSelectbox, .stNumberInput, .stSlider { color: white !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -52,7 +59,6 @@ with tab2:
     
     with col_prog:
         st.subheader("📅 Sélection du Programme")
-        # MODIFICATION : Ajout des 5 séances
         seance = st.radio(
             "Quelle séance fais-tu aujourd'hui ?", 
             [
@@ -104,7 +110,22 @@ with tab2:
         st.divider()
         st.subheader("🤖 Coach IA")
         question = st.text_input("Pose une question au coach sur cette séance :")
-        if question: st.info("Le Coach IA prépare une réponse basée sur votre programme...")
+        
+        # --- LOGIQUE IA (À CONFIGURER DANS STREAMLIT SECRETS) ---
+        if question:
+            # On vérifie si la clé API est configurée
+            try:
+                # Si tu utilises OpenAI
+                # import openai
+                # openai.api_key = st.secrets["OPENAI_API_KEY"]
+                # response = openai.ChatCompletion.create(...)
+                # st.write(f"**Réponse du Coach :** {response.choices[0].message.content}")
+                
+                # En attendant, on laisse le placeholder pour l'exemple
+                st.info("Le Coach IA se connecte au serveur... (Configurez votre clé API dans Streamlit Secrets)")
+                
+            except Exception as e:
+                st.error("Le Coach n'est pas encore connecté. Configurez votre clé API dans Streamlit Secrets.")
 
 # --- NUTRITION ---
 with tab3:
