@@ -4,29 +4,17 @@ import pandas as pd
 # Configuration de la page
 st.set_page_config(page_title="Dual-Core Coach", layout="wide", initial_sidebar_state="expanded")
 
-# --- STYLE VISUEL (TEXTE BLANC & CADRANS) ---
+# --- STYLE VISUEL ---
 st.markdown("""
     <style>
     .main { background-color: #0e1117; }
     .stat-card { 
-        padding: 20px; 
-        border-radius: 15px; 
-        background-color: #262730; 
-        border: 1px solid #464b5d; 
-        margin-bottom: 15px;
-        color: white !important;
-        text-align: center;
+        padding: 20px; border-radius: 15px; background-color: #262730; 
+        border: 1px solid #464b5d; margin-bottom: 15px; color: white !important; text-align: center;
     }
-    .stat-card h3 { color: #808495 !important; font-size: 0.9rem; margin-bottom: 5px; }
-    .stat-card h2 { color: white !important; font-size: 1.8rem; margin: 0; }
-    .stat-card p { color: #00ffcc !important; font-size: 0.8rem; margin-top: 5px; }
-    
     .exercice-box {
-        background-color: #1e1e26;
-        padding: 15px;
-        border-left: 5px solid #00ffcc;
-        border-radius: 5px;
-        margin-bottom: 10px;
+        background-color: #1e1e26; padding: 15px; border-left: 5px solid #00ffcc;
+        border-radius: 5px; margin-bottom: 10px; color: white;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -36,9 +24,13 @@ with st.sidebar:
     st.title("👤 Profil Athlète")
     poids_input = st.number_input("Poids actuel (kg)", value=75.0)
     taille_input = st.number_input("Taille (cm)", value=180)
+    
     st.divider()
-    st.success("Application Opérationnelle ✅")
-    st.info("Mode : Prise de masse")
+    mode_objectif = st.selectbox(
+        "Objectif actuel",
+        ["Prise de masse", "Maintien", "Sèche"]
+    )
+    st.success(f"Mode : {mode_objectif}")
 
 # --- NAVIGATION ---
 tab1, tab2, tab3 = st.tabs(["📊 Dashboard", "🏋️ Entraînement", "🍎 Nutrition"])
@@ -48,70 +40,77 @@ with tab1:
     st.title("Tableau de Bord 🚀")
     col1, col2, col3 = st.columns(3)
     imc = round(poids_input / ((taille_input/100)**2), 1)
-    
-    with col1:
-        st.markdown(f'<div class="stat-card"><h3>MON IMC</h3><h2>{imc}</h2><p>Athlétique</p></div>', unsafe_allow_html=True)
-    with col2:
-        st.markdown('<div class="stat-card"><h3>CALORIES CIBLES</h3><h2>2850</h2><p>+300 kcal surplus</p></div>', unsafe_allow_html=True)
-    with col3:
-        st.markdown('<div class="stat-card"><h3>PROTÉINES</h3><h2>165g</h2><p>2.2g / kg</p></div>', unsafe_allow_html=True)
+    with col1: st.markdown(f'<div class="stat-card"><h3>MON IMC</h3><h2>{imc}</h2></div>', unsafe_allow_html=True)
+    with col2: st.markdown(f'<div class="stat-card"><h3>CALORIES CIBLES</h3><h2>2850</h2></div>', unsafe_allow_html=True)
+    with col3: st.markdown(f'<div class="stat-card"><h3>OBJECTIF</h3><h2>{mode_objectif}</h2></div>', unsafe_allow_html=True)
 
-    st.subheader("📈 Évolution du poids")
-    st.line_chart(pd.DataFrame([poids_input-1, poids_input-0.5, poids_input], columns=["Poids"]))
-
-# --- ENTRAÎNEMENT (RETOUR DES PROGRAMMES) ---
+# --- ENTRAÎNEMENT ---
 with tab2:
-    st.title("💪 Programmes de Musculation")
+    st.title("💪 Plan d'Entraînement")
     
-    col_prog, col_input = st.columns([2, 1])
+    col_prog, col_input = st.columns([1.5, 1])
     
     with col_prog:
-        with st.expander("📅 Séance A : Pectoraux / Triceps", expanded=True):
-            st.markdown("""
-            <div class="exercice-box">
-                <b>Développé Couché :</b> 4 séries x 8-10 reps (Repos 2min)<br>
-                <b>Développé Incliné Haltères :</b> 3 séries x 12 reps<br>
-                <b>Dips :</b> 3 séries x Max reps<br>
-                <b>Extensions Triceps poulie :</b> 3 séries x 15 reps
-            </div>
-            """, unsafe_allow_html=True)
-            
-        with st.expander("📅 Séance B : Dos / Biceps"):
-            st.markdown("""
-            <div class="exercice-box">
-                <b>Tractions :</b> 4 séries x Max reps<br>
-                <b>Rowing Barre :</b> 4 séries x 10 reps<br>
-                <b>Curl Barre :</b> 3 séries x 12 reps<br>
-                <b>Hammer Curl :</b> 3 séries x 12 reps
-            </div>
-            """, unsafe_allow_html=True)
+        st.subheader("📅 Sélection du Programme")
+        # MODIFICATION : Ajout des 5 séances
+        seance = st.radio(
+            "Quelle séance fais-tu aujourd'hui ?", 
+            [
+                "Séance A : Pectoraux / Épaules / Triceps", 
+                "Séance B : Dos / Épaules / Biceps", 
+                "Séance C : Jambes / Abdos",
+                "Séance D : Marche",
+                "Séance E : Footing"
+            ]
+        )
+        
+        # Logique d'affichage des exercices par séance
+        if "Séance A" in seance:
+            exercices_liste = ["Développé Couché", "Développé Incliné Haltères", "Dips", "Développé Militaire", "Élévations Latérales", "Extensions Triceps"]
+            focus = "Pectoraux, Épaules et Triceps"
+        elif "Séance B" in seance:
+            exercices_liste = ["Tractions", "Rowing Barre", "Tirage Vertical", "Oiseau (Arrière épaules)", "Curl Biceps Barre", "Curl Marteau"]
+            focus = "Dos, Arrière Épaules et Biceps"
+        elif "Séance C" in seance:
+            exercices_liste = ["Squat", "Presse à cuisses", "Leg Extension", "Leg Curl", "Relevé de jambes (Abdos)", "Gainage (secondes)"]
+            focus = "Cuisses, Ischios et Sangle Abdominale"
+        elif "Séance D" in seance:
+            exercices_liste = ["Marche Rapide", "Marche Inclinaison", "Marche Active Extérieur"]
+            focus = "Récupération active / Cardio modéré"
+        else:
+            exercices_liste = ["Footing Zone 2", "Fractionné", "Endurance Fondamentale"]
+            focus = "Cardio / Endurance"
+
+        st.markdown(f'<div class="exercice-box"><b>Focus :</b> {focus}</div>', unsafe_allow_html=True)
 
     with col_input:
-        st.subheader("📝 Noter ma séance")
-        ex = st.text_input("Exercice fait", placeholder="ex: Couché")
-        pds = st.number_input("Charge (kg)", min_value=0)
-        reps = st.number_input("Répétitions", min_value=0)
-        if st.button("Enregistrer"):
-            st.success("Séance sauvegardée !")
+        st.subheader("📝 Suivi de Performance")
+        ex_choisi = st.selectbox("Sélectionner l'exercice", exercices_liste)
+        
+        # Adaptation des curseurs si c'est du cardio (Marche/Footing)
+        if "Séance D" in seance or "Séance E" in seance:
+            temps = st.select_slider("Durée (minutes)", options=range(1, 121), value=30)
+            intensite = st.select_slider("Intensité / Vitesse", options=range(1, 21), value=8)
+            if st.button("Enregistrer le cardio"):
+                st.success(f"Bravo ! {ex_choisi} : {temps} min à intensité {intensite}")
+        else:
+            pds = st.select_slider("Charge (kg)", options=range(1, 301), value=60)
+            reps = st.select_slider("Répétitions", options=range(1, 21), value=10)
+            series = st.select_slider("Nombre de séries", options=range(1, 7), value=4)
+            if st.button("Enregistrer la série"):
+                st.balloons()
+                st.success(f"Enregistré : {ex_choisi} | {series}x{reps} à {pds}kg")
         
         st.divider()
         st.subheader("🤖 Coach IA")
-        question = st.text_input("Question technique ?")
-        if question: st.info("Analyse en cours...")
+        question = st.text_input("Pose une question au coach sur cette séance :")
+        if question: st.info("Le Coach IA prépare une réponse basée sur votre programme...")
 
-# --- NUTRITION (RETOUR DES MACROS) ---
+# --- NUTRITION ---
 with tab3:
-    st.title("🍎 Plan Nutritionnel")
-    
+    st.title("🍎 Nutrition & Macros")
+    st.write(f"Plan alimentaire adapté au mode : **{mode_objectif}**")
     c1, c2, c3 = st.columns(3)
-    c1.metric("Glucides", "350g", "50%")
-    c2.metric("Protéines", "165g", "25%")
-    c3.metric("Lipides", "75g", "25%")
-
-    st.subheader("🍽️ Idée de repas type")
-    st.info("**Petit-Déjeuner :** 80g d'avoine, 3 oeufs, 1 banane.\n\n**Déjeuner :** 150g Poulet, 200g Riz pesé cuit, Légumes verts.\n\n**Dîner :** 150g Poisson blanc, Patate douce, Huile d'olive.")
-    
-    st.divider()
-    st.subheader("🍴 Assistant Nutrition")
-    repas_q = st.text_input("Besoin d'un menu pour ce soir ?")
-    if repas_q: st.warning("Recherche de recettes adaptées...")
+    c1.metric("Glucides", "350g")
+    c2.metric("Protéines", "165g")
+    c3.metric("Lipides", "75g")
