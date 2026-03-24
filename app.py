@@ -65,7 +65,8 @@ if 'poids_corps' not in st.session_state:
     st.session_state.poids_corps = [75.0, 74.8, 75.2, 74.9, 74.5, 74.2, 75.0]
 
 jours = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
-
+if "historique_repas" not in st.session_state:
+    st.session_state.historique_repas = [] # Liste de dictionnaires pour stocker chaque jour
 # --- BARRE LATÉRALE (PROFIL UNIQUEMENT) ---
 with st.sidebar:
     st.title("👤 Profil Athlète")
@@ -147,72 +148,69 @@ with tab2:
 with tab3:
     st.title("🍎 Nutrition & Macros Intelligentes")
     
-    # --- LOGIQUE DE CALCUL ---
+    # --- LOGIQUE DE CALCUL (Maintien des calculs précédents) ---
     maintenance = (10 * poids) + (6.25 * taille) - (5 * 25) + 5
-    
     if objectif == "Prise de masse":
-        cible_calorique = maintenance + 400
-        ratio_p, ratio_l, ratio_g = 2.0, 0.9, 4.5 
+        cible_calorique, ratio_p, ratio_l, ratio_g = maintenance + 400, 2.0, 0.9, 4.5 
     elif objectif == "Sèche":
-        cible_calorique = maintenance - 500
-        ratio_p, ratio_l, ratio_g = 2.4, 0.8, 2.0 
+        cible_calorique, ratio_p, ratio_l, ratio_g = maintenance - 500, 2.4, 0.8, 2.0 
     else: 
-        cible_calorique = maintenance
-        ratio_p, ratio_l, ratio_g = 1.8, 1.0, 3.5
+        cible_calorique, ratio_p, ratio_l, ratio_g = maintenance, 1.8, 1.0, 3.5
 
-    prot = round(poids * ratio_p)
-    lip = round(poids * ratio_l)
+    prot, lip = round(poids * ratio_p), round(poids * ratio_l)
     glu = round((cible_calorique - (prot * 4 + lip * 9)) / 4)
 
-    # --- 1. AFFICHAGE DES MACROS ---
+    # --- 1. DASHBOARD MACROS ---
     c1, c2, c3, c4 = st.columns(4)
     with c1: st.markdown(f'<div class="stat-card"><h3>Calories</h3><h2>{int(cible_calorique)}</h2></div>', unsafe_allow_html=True)
-    with c2: st.markdown(f'<div class="stat-card"><h3>Protéines</h3><h2>{prot}g</h2></div>', unsafe_allow_html=True)
-    with c3: st.markdown(f'<div class="stat-card"><h3>Lipides</h3><h2>{lip}g</h2></div>', unsafe_allow_html=True)
-    with c4: st.markdown(f'<div class="stat-card"><h3>Glucides</h3><h2>{glu}g</h2></div>', unsafe_allow_html=True)
+    with c2: st.markdown(f'<div class="stat-card"><h3>Prot (g)</h3><h2>{prot}</h2></div>', unsafe_allow_html=True)
+    with c3: st.markdown(f'<div class="stat-card"><h3>Lip (g)</h3><h2>{lip}</h2></div>', unsafe_allow_html=True)
+    with c4: st.markdown(f'<div class="stat-card"><h3>Glu (g)</h3><h2>{glu}</h2></div>', unsafe_allow_html=True)
 
-    st.markdown("---")
-    
-    # --- 2. LE REPAS DU JOUR (PROPOSÉ PAR L'AGENT) ---
-    st.subheader("🍽️ Menu du jour optimisé (Plan Agentique)")
-    
-    # On divise les macros en 4 repas type
+    # --- 2. LE MENU & VALIDATION ---
+    st.subheader("🍽️ Menu du jour & Enregistrement")
     col_m1, col_m2 = st.columns(2)
     with col_m1:
-        st.markdown(f"""
-        **🍳 Petit-Déjeuner** - Omelette (3 œufs)  
-        - {round(glu*0.2)}g d'avoine ou pain complet  
-        - 1 fruit de saison
-        
-        **🍗 Déjeuner** - {round(prot*0.35)}g de poulet ou poisson  
-        - {round(glu*0.35)}g de riz pesé cuit  
-        - Légumes verts à volonté
-        """)
+        st.write(f"**Matin:** Omelette & {round(glu*0.2)}g Avoine")
+        st.write(f"**Midi:** {round(prot*0.35)}g Poulet & {round(glu*0.35)}g Riz")
     with col_m2:
-        st.markdown(f"""
-        **🍎 Collation / Pré-Workout** - 1 Shaker de Whey ou 200g Fromage Blanc  
-        - 1 poignée d'amandes ({round(lip*0.3)}g)
-        
-        **🍲 Dîner** - {round(prot*0.3)}g de dinde ou tofu  
-        - {round(glu*0.25)}g de patate douce  
-        - 1 cuillère à soupe d'huile d'olive
-        """)
+        st.write(f"**Collation:** Whey & {round(lip*0.3)}g Amandes")
+        st.write(f"**Soir:** {round(prot*0.3)}g Dinde & {round(glu*0.25)}g Patate douce")
+
+    if st.button("✅ VALIDER ET ENREGISTRER MA JOURNÉE"):
+        nouvel_entree = {
+            "Date": pd.Timestamp.now().strftime("%Y-%m-%d"),
+            "Calories": int(cible_calorique),
+            "P": prot, "L": lip, "G": glu,
+            "Objectif": objectif
+        }
+        st.session_state.historique_repas.append(nouvel_entree)
+        st.success("Journée enregistrée dans ton historique !")
 
     st.markdown("---")
     
-    # --- 3. GRAPHIQUE DE RÉPARTITION ---
-    st.subheader("📊 Répartition de ton assiette idéale")
-    df_macro = pd.DataFrame({
-        "Macro": ["Protéines", "Lipides", "Glucides"],
-        "Grammes": [prot, lip, glu]
-    })
-    fig_pie = px.pie(df_macro, values="Grammes", names="Macro", 
-                 color_discrete_map={"Protéines":"#00ffcc", "Lipides":"#ffff00", "Glucides":"#ff6600"},
-                 hole=0.6)
-    fig_pie.update_layout(paper_bgcolor='rgba(0,0,0,0)', font=dict(color="white"), showlegend=True)
-    st.plotly_chart(fig_pie, use_container_width=True)
+    # --- 3. CALENDRIER & HISTORIQUE ---
+    st.subheader("📅 Historique de Nutrition")
+    
+    if st.session_state.historique_repas:
+        df_hist = pd.DataFrame(st.session_state.historique_repas)
+        
+        # Affichage sous forme de tableau propre
+        st.table(df_hist.tail(7)) # Affiche les 7 derniers jours
+        
+        # Petit graphique de suivi calorique sur le temps
+        fig_hist = px.line(df_hist, x="Date", y="Calories", title="Évolution de ton apport calorique", markers=True)
+        fig_hist.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white"))
+        st.plotly_chart(fig_hist, use_container_width=True)
+    else:
+        st.info("Aucun repas enregistré pour le moment. Clique sur 'Valider' pour commencer ton historique.")
 
-    st.info(f"💡 Ce menu est calibré pour un athlète de {poids}kg en mode {objectif}. L'Agent ajuste les quantités selon ton activité réelle.")
+    # --- 4. RÉPARTITION VISUELLE ---
+    with st.expander("📊 Voir la répartition théorique des macros"):
+        df_macro = pd.DataFrame({"Macro": ["P", "L", "G"], "Grammes": [prot, lip, glu]})
+        fig_pie = px.pie(df_macro, values="Grammes", names="Macro", hole=0.6, color_discrete_sequence=['#00ffcc', '#ffff00', '#ff6600'])
+        fig_pie.update_layout(paper_bgcolor='rgba(0,0,0,0)', font=dict(color="white"))
+        st.plotly_chart(fig_pie, use_container_width=True)
 
 # --- TAB 4 : AGENT AI ---
 with tab4:
