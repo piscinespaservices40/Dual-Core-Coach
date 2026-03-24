@@ -155,48 +155,64 @@ with tab3:
 # --- TAB 4 : AGENT AI ---
 with tab4:
     st.title("🤖 Dual-Core Coach AI : Expert Omniscient")
-    st.markdown('<p style="color:#00ffcc; font-weight:bold;">Analyse Multimodale : Sommeil, Nutrition, Récupération & Biomécanique.</p>', unsafe_allow_html=True)
+    st.markdown('<p style="color:#00ffcc; font-weight:bold;">Analyse Multimodale : Sommeil, Nutrition & Récupération Nerveuse.</p>', unsafe_allow_html=True)
     
-    # --- SECTION RÉCUPÉRATION ---
-    col_recup1, col_recup2 = st.columns(2)
+    # --- PILIERS DE RÉCUPÉRATION ---
+    col_recup1, col_recup2, col_recup3 = st.columns(3)
     with col_recup1:
-        sommeil = st.select_slider("Qualité du sommeil (h)", options=[4, 5, 6, 7, 8, 9, 10], value=7)
+        sommeil = st.select_slider("🌙 Sommeil (Qualité/Durée)", options=[4, 5, 6, 7, 8, 9, 10], value=7)
     with col_recup2:
-        fatigue = st.select_slider("État nerveux / Fatigue", options=["Épuisé", "Fatigué", "Normal", "En forme", "Explosif"], value="Normal")
+        mental = st.select_slider("🧠 État Psychologique", options=["Stressé", "Anxieux", "Neutre", "Motivé", "Focus"], value="Neutre")
+    with col_recup3:
+        nerveux = st.select_slider("⚡ Fatigue Nerveuse", options=["Burnout", "Fatigué", "Ok", "Frais", "Explosif"], value="Ok")
 
     st.markdown("---")
 
-    # --- CHAT INTERACTIF ---
+    # --- CHAT INTERACTIF SIMULÉ ---
     if "messages" not in st.session_state:
-        st.session_state.messages = [{"role": "assistant", "content": "Salut Athlète. Je suis ton coach. Je suis prêt à analyser ton frigo ou à t'expliquer un mouvement en vidéo. Que fait-on ?"}]
+        st.session_state.messages = [{"role": "assistant", "content": "Salut Athlète. Je suis ton coach. Je peux analyser tes cycles de sommeil ou t'aider pour ta nutrition. Que fait-on ?"}]
 
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # --- ENTRÉE UTILISATEUR (TEXTE + PHOTO DU FRIGO) ---
-    with st.expander("📸 Envoyer une photo au coach (Frigo, Assiette, Exercice)"):
-        photo_coach = st.file_uploader("Le coach analysera tes macros ou ta forme", type=['jpg', 'jpeg', 'png'], key="coach_photo")
+    # --- ANALYSE PHOTO (FRIGO / REPAS) ---
+    with st.expander("📸 Analyser mon frigo ou mon repas"):
+        upload_frigo = st.file_uploader("Prends une photo de l'intérieur de ton frigo", type=['jpg', 'png'])
+        if upload_frigo:
+            st.info("Photo reçue ! Analyse des ingrédients disponibles en cours...")
 
-    if prompt := st.chat_input("Pose ta question..."):
+    # --- LOGIQUE DE RÉPONSE EXPERTE ---
+    if prompt := st.chat_input("Pose ta question (ex: Comment faire des shrugs ?)"):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
         
         with st.chat_message("assistant"):
-            # LOGIQUE DU COACH
-            if "shrugs" in prompt.lower() or "exercice" in prompt.lower():
-                reponse = "Voici une démonstration visuelle pour les **Shrugs Barre**. Concentre-toi sur la montée verticale sans rouler les épaules."
+            p = prompt.lower()
+            
+            # Cas 1 : Demande de démonstration visuelle
+            if "shrugs" in p:
+                reponse = "Les **Shrugs** (haussements d'épaules) ciblent tes trapèzes supérieurs. Monte les épaules vers les oreilles, marque une pause, et redescends sans rouler les épaules vers l'avant."
                 st.markdown(reponse)
-                # ICI ON SIMULE L'EXEMPLE VISUEL (GIF/Vidéo)
                 st.image("https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3Y2ZzR3ZzR3ZzR3ZzR3ZzR3ZzR3ZzR3ZzR3ZzR3ZzR3ZzR3JmcmVzaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKMGpxP5O5Q8L9S/giphy.gif", caption="Démonstration Shrugs")
             
-            elif photo_coach:
-                reponse = f"Analyse de ton frigo terminée. Vu ton objectif de **{objectif}**, je vois des œufs et des légumes. Prépare une omelette avec 3 œufs et 150g de riz pour tes macros."
+            # Cas 2 : Conseil Nutrition (Frigo)
+            elif upload_frigo or "manger" in p or "repas" in p:
+                reponse = f"Basé sur ton objectif de **{objectif}**, je te suggère un apport riche en protéines et glucides complexes. Si ton frigo contient des œufs et du poulet, pars sur une base de 150g de protéines."
                 st.markdown(reponse)
             
+            # Cas 3 : Récupération Psychologique & Nerveuse
+            elif "fatigue" in p or "recup" in p or "sommeil" in p:
+                if nerveux in ["Burnout", "Fatigué"] or mental in ["Stressé", "Anxieux"]:
+                    reponse = f"⚠️ Ton état **{mental}** et ta fatigue **{nerveux}** indiquent un surentraînement. Aujourd'hui, fais une séance de 'Deload' : divise tes charges par 2 pour laisser ton système nerveux récupérer."
+                else:
+                    reponse = "Tes indicateurs de récupération sont bons. Tu peux attaquer ta séance de force normalement."
+                st.markdown(reponse)
+            
+            # Cas par défaut
             else:
-                reponse = f"Analyse récupération : Avec {sommeil}h de sommeil et une fatigue {fatigue}, je te conseille de réduire le volume sur ta séance de **{muscle_select}** aujourd'hui pour protéger ton système nerveux."
+                reponse = f"Analyse Coach : Pour tes {poids}kg, assure-toi de maintenir une tension mécanique élevée sur l'exercice choisi. Veux-tu un conseil technique spécifique ?"
                 st.markdown(reponse)
                 
             st.session_state.messages.append({"role": "assistant", "content": reponse})
