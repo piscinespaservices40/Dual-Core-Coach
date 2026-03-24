@@ -109,3 +109,25 @@ with tab3:
     if img:
         st.image(img, caption="Analyse en cours...", use_container_width=True)
         st.warning("L'analyse visuelle nécessite la connexion au cerveau GPT-4 Vision.")
+# --- GRAPHIQUE NUTRITION ---
+    st.markdown("---")
+    st.subheader("🥗 Suivi des Macros (g)")
+    
+    # On crée le graphique avec tes couleurs
+    fig_nutri = px.line(data_nutrition, x="Jour", 
+                        y=["Proteines", "Lipides", "Glucides"],
+                        color_discrete_map={
+                            "Proteines": "#00ff00", # Vert
+                            "Lipides": "#ffff00",   # Jaune
+                            "Glucides": "#0000ff"   # Bleu
+                        })
+
+    # On le rend transparent pour ton style sombre
+    fig_nutri.update_layout(
+        paper_bgcolor='rgba(0,0,0,0)', 
+        plot_bgcolor='rgba(0,0,0,0)', 
+        font_color="white",
+        legend_title_text='Nutriments'
+    )
+    
+    st.plotly_chart(fig_nutri, use_container_width=True)
