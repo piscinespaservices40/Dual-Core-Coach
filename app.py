@@ -122,12 +122,14 @@ with tab3:
                             "Glucides": "#0000ff"   # Bleu
                         })
 
-    # On le rend transparent pour ton style sombre
+ # On rend tout le texte du graphique blanc, y compris la légende
     fig_nutri.update_layout(
         paper_bgcolor='rgba(0,0,0,0)', 
         plot_bgcolor='rgba(0,0,0,0)', 
-        font_color="white",
-        legend_title_text='Nutriments'
+        font=dict(color="white"), # Force TOUTE la police en blanc
+        legend_title_font_color="white",
+        legend_font_color="white",
+        hovermode="x unified"
     )
     
     st.plotly_chart(fig_nutri, use_container_width=True)
