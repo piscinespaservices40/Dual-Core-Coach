@@ -37,20 +37,43 @@ with st.sidebar:
     taille = st.number_input("Taille (cm)", value=180)
     objectif = st.selectbox("Objectif", ["Prise de masse", "Maintien", "Sèche"])
     st.info(f"Mode activé : {objectif}")
+    st.markdown("---")
+    st.subheader("📝 Noter ma séance")
+    
+    # Formulaire pour le poids de corps
+    nouveau_poids = st.number_input("Poids du jour (kg)", value=float(poids), step=0.1)
+    
+    # Formulaire pour la muscu (ex: Développé Couché)
+    nouvelle_charge = st.number_input("Charge DC (kg)", value=65.0, step=2.5)
+    
+    if st.button("Enregistrer les données"):
+        # On met à jour la mémoire (le dernier jour de la semaine)
+        st.session_state.historique_poids[-1] = nouveau_poids
+        st.session_state.charge_max[-1] = nouvelle_charge
+        st.success("Données enregistrées !")
+        st.rerun()
 # Données pour les graphiques
+# --- MÉMOIRE DE L'APP (Session State) ---
+if 'historique_poids' not in st.session_state:
+    st.session_state.historique_poids = [75.0, 74.8, 75.2, 74.9, 74.5, 74.2, 75.0]
+
+if 'charge_max' not in st.session_state:
+    # On prépare déjà ton suivi d'exercices (ex: Développé Couché)
+    st.session_state.charge_max = [60, 60, 62.5, 62.5, 65, 65, 67.5]
+
 jours = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
+
+# On crée les tableaux à partir de cette mémoire
+data_poids = pd.DataFrame({"Jour": jours, "Poids": st.session_state.historique_poids})
+data_entrainement = pd.DataFrame({"Jour": jours, "Charge (kg)": st.session_state.charge_max})
+
+# On garde tes données de nutrition ici aussi
 data_nutrition = pd.DataFrame({
     "Jour": jours,
     "Proteines": [150, 165, 140, 170, 155, 130, 160],
     "Lipides": [70, 80, 75, 65, 85, 90, 70],
     "Glucides": [300, 350, 320, 280, 340, 400, 310]
 })
-# Données pour le suivi du poids
-data_poids = pd.DataFrame({
-    "Jour": jours,
-    "Poids": [poids - 0.5, poids - 0.3, poids, poids - 0.2, poids - 0.6, poids - 0.8, poids]
-})
-tab1, tab2, tab3 = st.tabs(["📊 Dashboard", "🏋️ Entraînement", "🍎 Nutrition"])
 
 # --- TAB 1 : DASHBOARD ---
 with tab1:
@@ -86,10 +109,24 @@ with tab2:
         st.info("Routine : 4 séries de 10 répétitions")
     
     with col_t2:
-        st.subheader("Intensité de la semaine")
-        fig_train = px.bar(data_train, x="Jour", y="Intensité (%)", color_discrete_sequence=['#ff6600'])
-        fig_train.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white"))
-        st.plotly_chart(fig_train, use_container_width=True)
+        st.subheader("📈 Progression : Développé Couché")
+        
+        # On utilise data_entrainement qu'on a créé avec la mémoire
+        fig_charge = px.line(data_entrainement, x="Jour", y="Charge (kg)", 
+                             markers=True,
+                             color_discrete_sequence=['#ff6600']) # Ton orange néon
+        
+        fig_charge.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)', 
+            plot_bgcolor='rgba(0,0,0,0)', 
+            font=dict(color="white"),
+            hovermode="x unified"
+        )
+        
+        # On ajuste l'axe pour que ce soit lisible
+        fig_charge.update_yaxes(range=[min(st.session_state.charge_max)-5, max(st.session_state.charge_max)+5])
+        
+        st.plotly_chart(fig_charge, use_container_width=True)
 
 # --- TAB 3 : NUTRITION ---
 with tab3:
