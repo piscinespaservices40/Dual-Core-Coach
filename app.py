@@ -8,37 +8,53 @@ st.set_page_config(page_title="Dual-Core Coach AI", layout="wide", initial_sideb
 # --- STYLE VISUEL (CSS) ---
 st.markdown("""
 <style>
-    /* Fond de l'application */
-    .stApp { background: radial-gradient(circle at top, #1e1e2f 0%, #0d0d12 100%) !important; color: #e0e0e0 !important; }
+    /* Fond global */
+    .stApp { background: radial-gradient(circle at top, #1e1e2f 0%, #0d0d12 100%) !important; }
     
-    /* Titres des cartes de stats */
-    .stat-card { padding: 20px; border-radius: 20px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(0, 255, 204, 0.2); text-align: center; margin-bottom: 20px; backdrop-filter: blur(10px); }
-    .stat-card h2 { color: #00ffcc !important; font-size: 2.2rem !important; margin: 0; }
-    
-    /* --- COULEUR BLEU NÉON POUR TOUS LES LABELS (NET ET PRÉCIS) --- */
-    label, .stMarkdown p, .stSelectbox label, .stSlider label, .stNumberInput label, [data-testid="stWidgetLabel"] p {
+    /* TOUT le texte par défaut en blanc cassé pour la lisibilité */
+    html, body, [class*="st-"] {
+        color: #ffffff !important;
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Titres et Sous-titres en Bleu Néon */
+    h1, h2, h3, .stSubheader {
+        color: #00ffcc !important;
+        text-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+    }
+
+    /* Labels des champs (Poids, Taille, etc.) */
+    label, [data-testid="stWidgetLabel"] p {
         color: #00ffcc !important;
         font-weight: bold !important;
-        text-shadow: none !important; /* On retire l'ombre qui fait baver le texte */
-        font-size: 1rem !important;
+        font-size: 1.1rem !important;
     }
 
-    /* Rendre spécifiquement les textes Jour, Semaine, Mois très clairs */
+    /* Forcer le texte des tableaux et de l'historique en blanc */
+    .stTable, table, th, td {
+        color: #ffffff !important;
+        background-color: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    /* Correction spécifique pour le menu Nutrition (Matin, Midi, Soir) */
+    .stMarkdown p, .stMarkdown strong {
+        color: #e0e0e0 !important;
+    }
+
+    /* Cartes de stats (Calories, Prot, etc.) */
+    .stat-card {
+        padding: 20px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(0, 255, 204, 0.2);
+        text-align: center;
+    }
+    .stat-card h3 { color: #ffffff !important; font-size: 1rem !important; }
+    .stat-card h2 { color: #00ffcc !important; font-size: 2rem !important; }
+
+    /* Boutons Radio (Jour/Semaine/Mois) */
     div[data-testid="stRadio"] label p {
         color: #00ffcc !important;
-        text-shadow: none !important;
-    }
-
-    /* Style des onglets */
-    .stTabs [data-baseweb="tab-active"] { color: #ff6600 !important; border-bottom-color: #ff6600 !important; }
-    
-    /* Bouton Valider personnalisé */
-    div.stButton > button {
-        background-color: #ff6600 !important;
-        color: white !important;
-        border-radius: 10px;
-        border: none;
-        width: 100%;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -158,7 +174,7 @@ with tab3:
         cible_calorique, ratio_p, ratio_l, ratio_g = maintenance, 1.8, 1.0, 3.5
 
     prot, lip = round(poids * ratio_p), round(poids * ratio_l)
-    glu = round((cible_calorique - (prot * 4 + lip * 9)) / 4)
+    glu = max(50, round((cible_calorique - (prot * 4 + lip * 9)) / 4))
 
     # --- 1. DASHBOARD MACROS ---
     c1, c2, c3, c4 = st.columns(4)
