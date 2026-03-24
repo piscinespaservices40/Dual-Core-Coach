@@ -1,5 +1,6 @@
 import streamlit as st
-
+import pandas as pd
+import plotly.express as px
 # Configuration de la page
 st.set_page_config(page_title="Dual-Core Coach", layout="wide", initial_sidebar_state="expanded")
 
@@ -36,7 +37,14 @@ with st.sidebar:
     taille = st.number_input("Taille (cm)", value=180)
     objectif = st.selectbox("Objectif", ["Prise de masse", "Maintien", "Sèche"])
     st.info(f"Mode activé : {objectif}")
-
+# Données pour les graphiques
+jours = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
+data_nutrition = pd.DataFrame({
+    "Jour": jours,
+    "Proteines": [150, 165, 140, 170, 155, 130, 160],
+    "Lipides": [70, 80, 75, 65, 85, 90, 70],
+    "Glucides": [300, 350, 320, 280, 340, 400, 310]
+})
 tab1, tab2, tab3 = st.tabs(["📊 Dashboard", "🏋️ Entraînement", "🍎 Nutrition"])
 
 # --- TAB 1 : DASHBOARD ---
