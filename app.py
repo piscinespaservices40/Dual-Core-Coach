@@ -168,22 +168,17 @@ with tab4:
 
     st.markdown("---")
 
-    # --- CHAT INTERACTIF SIMULÉ ---
+    # --- HISTORIQUE DE DISCUSSION ---
     if "messages" not in st.session_state:
-        st.session_state.messages = [{"role": "assistant", "content": "Salut Athlète. Je suis ton coach. Je peux analyser tes cycles de sommeil ou t'aider pour ta nutrition. Que fait-on ?"}]
+        st.session_state.messages = [{"role": "assistant", "content": f"Salut Athlète. Ton mode **{objectif}** est actif. Comment puis-je t'aider ?"}]
 
+    # On affiche les messages existants
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # --- ANALYSE PHOTO (FRIGO / REPAS) ---
-    with st.expander("📸 Analyser mon frigo ou mon repas"):
-        upload_frigo = st.file_uploader("Prends une photo de l'intérieur de ton frigo", type=['jpg', 'png'])
-        if upload_frigo:
-            st.info("Photo reçue ! Analyse des ingrédients disponibles en cours...")
-
-    # --- LOGIQUE DE RÉPONSE EXPERTE ---
-    if prompt := st.chat_input("Pose ta question (ex: Comment faire des shrugs ?)"):
+    # --- ENTRÉE TEXTE ---
+    if prompt := st.chat_input("Pose ta question..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
@@ -191,28 +186,33 @@ with tab4:
         with st.chat_message("assistant"):
             p = prompt.lower()
             
-            # Cas 1 : Demande de démonstration visuelle
+            # LOGIQUE DE DÉTECTION AMÉLIORÉE
             if "shrugs" in p:
-                reponse = "Les **Shrugs** (haussements d'épaules) ciblent tes trapèzes supérieurs. Monte les épaules vers les oreilles, marque une pause, et redescends sans rouler les épaules vers l'avant."
-                st.markdown(reponse)
-                st.image("https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3Y2ZzR3ZzR3ZzR3ZzR3ZzR3ZzR3ZzR3ZzR3ZzR3ZzR3ZzR3JmcmVzaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKMGpxP5O5Q8L9S/giphy.gif", caption="Démonstration Shrugs")
+                reponse = "Pour les **Shrugs**, concentre-toi sur tes trapèzes supérieurs. Monte les épaules vers les oreilles, marque une pause de 1s en haut, puis contrôle la descente."
+                st.image("https://media.giphy.com/media/3o7TKMGpxP5O5Q8L9S/giphy.gif")
             
-            # Cas 2 : Conseil Nutrition (Frigo)
-            elif upload_frigo or "manger" in p or "repas" in p:
-                reponse = f"Basé sur ton objectif de **{objectif}**, je te suggère un apport riche en protéines et glucides complexes. Si ton frigo contient des œufs et du poulet, pars sur une base de 150g de protéines."
-                st.markdown(reponse)
-            
-            # Cas 3 : Récupération Psychologique & Nerveuse
-            elif "fatigue" in p or "recup" in p or "sommeil" in p:
-                if nerveux in ["Burnout", "Fatigué"] or mental in ["Stressé", "Anxieux"]:
-                    reponse = f"⚠️ Ton état **{mental}** et ta fatigue **{nerveux}** indiquent un surentraînement. Aujourd'hui, fais une séance de 'Deload' : divise tes charges par 2 pour laisser ton système nerveux récupérer."
+            elif "fatigué" in p or "fatigue" in p or "séance" in p:
+                if nerveux in ["Burnout", "Fatigué"] or sommeil < 6:
+                    reponse = f"⚠️ Vu ton sommeil de {sommeil}h et ta fatigue {nerveux}, je te déconseille une séance lourde. Pour ton objectif de {objectif}, fais une séance de rappel léger ou du cardio zone 2."
                 else:
-                    reponse = "Tes indicateurs de récupération sont bons. Tu peux attaquer ta séance de force normalement."
-                st.markdown(reponse)
+                    reponse = f"Ta fatigue nerveuse est '{nerveux}'. Tu peux tenter ta séance de **{muscle_select}**, mais surveille tes temps de repos !"
             
-            # Cas par défaut
+            elif "pectoraux" in p or "pecs" in p:
+                reponse = "Pour les Pectoraux, privilégie le Développé Couché en début de séance pour la force, puis des écartés poulie pour l'isolation et le stretch."
+            
+            elif "manger" in p or "repas" in p or "faim" in p:
+                reponse = f"En phase de **{objectif}**, ton dernier repas doit comporter au moins 40g de protéines. Utilise le module photo juste en dessous pour que j'analyse ton frigo !"
+            
             else:
-                reponse = f"Analyse Coach : Pour tes {poids}kg, assure-toi de maintenir une tension mécanique élevée sur l'exercice choisi. Veux-tu un conseil technique spécifique ?"
-                st.markdown(reponse)
-                
+                reponse = f"Analyse Coach : Pour optimiser tes {poids}kg, assure-toi d'être à l'échec technique sur tes dernières séries de {exercice_select}. As-tu une question sur ta récupération ?"
+            
+            st.markdown(reponse)
             st.session_state.messages.append({"role": "assistant", "content": reponse})
+
+    st.markdown("---")
+    # --- ANALYSE PHOTO (PLACÉE EN BAS) ---
+    with st.expander("📸 ANALYSER MON FRIGO OU MON REPAS"):
+        upload_frigo = st.file_uploader("Prends une photo de l'intérieur de ton frigo ou de ton assiette", type=['jpg', 'png'])
+        if upload_frigo:
+            st.success("Photo bien reçue ! (Le moteur d'analyse visuelle sera activé lors de la connexion API)")
+            st.info(f"Conseil rapide pour **{objectif}** : Privilégie les sources de protéines brutes visibles sur ta photo.")
