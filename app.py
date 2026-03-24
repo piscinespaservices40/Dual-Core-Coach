@@ -112,40 +112,36 @@ with tab2:
             st.rerun()
 
     with col_graph:
-        # --- SÉLECTEUR DE PÉRIODE ---
         periode = st.radio("Vue de la progression :", ["Jour", "Semaine", "Mois"], horizontal=True)
-        
         st.subheader(f"📈 Progression : {exercice_select}")
         
-        # Récupération des données
-        base_data = st.session_state.historique_charges[exercice_select]
+        # Récupération de TOUTES les données enregistrées pour cet exercice
+        y_data = st.session_state.historique_charges[exercice_select]
         
-        if periode == "Jour":
-            # On affiche les 7 derniers jours
-            y_data = base_data[-7:]
-            x_label = jours
-        elif periode == "Semaine":
-            # On simule une vue par semaine (moyenne des points)
-            y_data = base_data[-28:] # On prend plus de données
-            x_label = [f"Sem {i+1}" for i in range(len(y_data)//4 + 1)][-7:]
-            y_data = y_data[::4] # On prend un point toutes les 4 séances pour l'exemple
-        else: # Mois
-            # On simule une vue annuelle/mensuelle
-            y_data = [base_data[0], base_data[-1]] # Début vs Fin
-            x_label = ["Mois Précédent", "Mois Actuel"]
+        # On crée des étiquettes simples (Séance 1, Séance 2...) pour éviter les erreurs de dates
+        x_label = [f"Séance {i+1}" for i in range(len(y_data))]
 
+        # On adapte la vue selon le bouton, mais SEULEMENT si on a assez de données
+        if periode == "Jour" and len(y_data) > 7:
+            y_data = y_data[-7:]
+            x_label = x_label[-7:]
+        elif periode == "Semaine" and len(y_data) > 4:
+            # On affiche un point par groupe de 4 séances pour simuler les semaines
+            y_data = y_data[::4]
+            x_label = [f"Sem {i+1}" for i in range(len(y_data))]
+
+        # Création du graphique sécurisé
         fig_ex = px.area(x=x_label, y=y_data, markers=True, color_discrete_sequence=['#ff6600'])
         
         fig_ex.update_layout(
             paper_bgcolor='rgba(0,0,0,0)', 
             plot_bgcolor='rgba(0,0,0,0)', 
             font=dict(color="white"),
-            xaxis_title=f"Période ({periode})",
+            xaxis_title="Chronologie des séances",
             yaxis_title="Charge (kg)"
         )
         
         st.plotly_chart(fig_ex, use_container_width=True)
-        st.write(f"**Focus actuel :** {series} séries de {reps} répétitions sur {exercice_select}")
 
 # --- TAB 3 : NUTRITION ---
 with tab3:
