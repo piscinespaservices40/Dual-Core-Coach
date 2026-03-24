@@ -154,21 +154,31 @@ with tab3:
     st.plotly_chart(fig_n, use_container_width=True)
 
 # --- TAB 4 : AGENT AI ---
+# --- TAB 4 : AGENT AI ---
 with tab4:
-    st.title("🤖 Coach AI Personnel")
-    st.write("Pose tes questions à ton coach pour optimiser tes cycles de progression.")
+    st.title("🤖 Dual-Core Coach AI")
+    st.markdown('<p style="color:#00ffcc; font-weight:bold;">Analyse en temps réel de tes performances et conseils d\'optimisation.</p>', unsafe_allow_html=True)
     
+    # Initialisation de la mémoire du chat
     if "messages" not in st.session_state:
-        st.session_state.messages = []
+        st.session_state.messages = [
+            {"role": "assistant", "content": f"Salut Athlète ! Je suis ton coach AI spécialisé. Je vois que ton objectif est : **{objectif}**. Comment puis-je t'aider à optimiser ta séance de **{muscle_select}** aujourd'hui ?"}
+        ]
 
+    # Affichage des messages
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    if prompt := st.chat_input("Ex: Comment améliorer mon développé couché ?"):
+    # Entrée utilisateur (Le Chat)
+    if prompt := st.chat_input("Pose ta question au coach..."):
+        # On ajoute le message de l'utilisateur
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
         
+        # Réponse intelligente simulée
         with st.chat_message("assistant"):
-            st.markdown("Je suis prêt à analyser tes performances pour ajuster tes prochaines séances.")
+            reponse = f"Analyse de tes stats en cours... Pour ton profil de {poids}kg en mode **{objectif}**, je te suggère de te concentrer sur la phase excentrique sur l'exercice **{exercice_select}**. Est-ce que tu veux que je regarde ton historique de charge sur ce mouvement ?"
+            st.markdown(reponse)
+            st.session_state.messages.append({"role": "assistant", "content": reponse})
