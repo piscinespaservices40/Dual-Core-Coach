@@ -15,16 +15,18 @@ st.markdown("""
     .stat-card { padding: 20px; border-radius: 20px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(0, 255, 204, 0.2); text-align: center; margin-bottom: 20px; backdrop-filter: blur(10px); }
     .stat-card h2 { color: #00ffcc !important; font-size: 2.2rem !important; margin: 0; }
     
-    /* --- COULEUR BLEU NÉON POUR TOUS LES LABELS --- */
-    label, .stMarkdown p, .stSelectbox label, .stSlider label, .stNumberInput label, [data-testid="stWidgetLabel"] {
+    /* --- COULEUR BLEU NÉON POUR TOUS LES LABELS (NET ET PRÉCIS) --- */
+    label, .stMarkdown p, .stSelectbox label, .stSlider label, .stNumberInput label, [data-testid="stWidgetLabel"] p {
         color: #00ffcc !important;
         font-weight: bold !important;
-        text-shadow: 0 0 5px rgba(0, 255, 204, 0.5);
+        text-shadow: none !important; /* On retire l'ombre qui fait baver le texte */
+        font-size: 1rem !important;
     }
 
-    /* Couleur pour les boutons radio (Jour, Semaine, Mois) */
-    div[data-testid="stRadio"] label {
+    /* Rendre spécifiquement les textes Jour, Semaine, Mois très clairs */
+    div[data-testid="stRadio"] label p {
         color: #00ffcc !important;
+        text-shadow: none !important;
     }
 
     /* Style des onglets */
