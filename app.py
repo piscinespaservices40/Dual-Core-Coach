@@ -145,12 +145,74 @@ with tab2:
 
 # --- TAB 3 : NUTRITION ---
 with tab3:
-    st.title("🍎 Nutrition & Macros")
-    st.subheader("Suivi hebdomadaire")
-    data_nutri = pd.DataFrame({"Jour": jours, "Proteines": [150, 160, 155, 170, 150, 140, 160], "Lipides": [70, 75, 70, 65, 80, 85, 70], "Glucides": [300, 320, 310, 290, 330, 350, 300]})
-    fig_n = px.line(data_nutri, x="Jour", y=["Proteines", "Lipides", "Glucides"], color_discrete_map={"Proteines": "#00ff00", "Lipides": "#ffff00", "Glucides": "#0000ff"})
-    fig_n.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white"), legend_font_color="white")
-    st.plotly_chart(fig_n, use_container_width=True)
+    st.title("🍎 Nutrition & Macros Intelligentes")
+    
+    # --- LOGIQUE DE CALCUL ---
+    maintenance = (10 * poids) + (6.25 * taille) - (5 * 25) + 5
+    
+    if objectif == "Prise de masse":
+        cible_calorique = maintenance + 400
+        ratio_p, ratio_l, ratio_g = 2.0, 0.9, 4.5 
+    elif objectif == "Sèche":
+        cible_calorique = maintenance - 500
+        ratio_p, ratio_l, ratio_g = 2.4, 0.8, 2.0 
+    else: 
+        cible_calorique = maintenance
+        ratio_p, ratio_l, ratio_g = 1.8, 1.0, 3.5
+
+    prot = round(poids * ratio_p)
+    lip = round(poids * ratio_l)
+    glu = round((cible_calorique - (prot * 4 + lip * 9)) / 4)
+
+    # --- 1. AFFICHAGE DES MACROS ---
+    c1, c2, c3, c4 = st.columns(4)
+    with c1: st.markdown(f'<div class="stat-card"><h3>Calories</h3><h2>{int(cible_calorique)}</h2></div>', unsafe_allow_html=True)
+    with c2: st.markdown(f'<div class="stat-card"><h3>Protéines</h3><h2>{prot}g</h2></div>', unsafe_allow_html=True)
+    with c3: st.markdown(f'<div class="stat-card"><h3>Lipides</h3><h2>{lip}g</h2></div>', unsafe_allow_html=True)
+    with c4: st.markdown(f'<div class="stat-card"><h3>Glucides</h3><h2>{glu}g</h2></div>', unsafe_allow_html=True)
+
+    st.markdown("---")
+    
+    # --- 2. LE REPAS DU JOUR (PROPOSÉ PAR L'AGENT) ---
+    st.subheader("🍽️ Menu du jour optimisé (Plan Agentique)")
+    
+    # On divise les macros en 4 repas type
+    col_m1, col_m2 = st.columns(2)
+    with col_m1:
+        st.markdown(f"""
+        **🍳 Petit-Déjeuner** - Omelette (3 œufs)  
+        - {round(glu*0.2)}g d'avoine ou pain complet  
+        - 1 fruit de saison
+        
+        **🍗 Déjeuner** - {round(prot*0.35)}g de poulet ou poisson  
+        - {round(glu*0.35)}g de riz pesé cuit  
+        - Légumes verts à volonté
+        """)
+    with col_m2:
+        st.markdown(f"""
+        **🍎 Collation / Pré-Workout** - 1 Shaker de Whey ou 200g Fromage Blanc  
+        - 1 poignée d'amandes ({round(lip*0.3)}g)
+        
+        **🍲 Dîner** - {round(prot*0.3)}g de dinde ou tofu  
+        - {round(glu*0.25)}g de patate douce  
+        - 1 cuillère à soupe d'huile d'olive
+        """)
+
+    st.markdown("---")
+    
+    # --- 3. GRAPHIQUE DE RÉPARTITION ---
+    st.subheader("📊 Répartition de ton assiette idéale")
+    df_macro = pd.DataFrame({
+        "Macro": ["Protéines", "Lipides", "Glucides"],
+        "Grammes": [prot, lip, glu]
+    })
+    fig_pie = px.pie(df_macro, values="Grammes", names="Macro", 
+                 color_discrete_map={"Protéines":"#00ffcc", "Lipides":"#ffff00", "Glucides":"#ff6600"},
+                 hole=0.6)
+    fig_pie.update_layout(paper_bgcolor='rgba(0,0,0,0)', font=dict(color="white"), showlegend=True)
+    st.plotly_chart(fig_pie, use_container_width=True)
+
+    st.info(f"💡 Ce menu est calibré pour un athlète de {poids}kg en mode {objectif}. L'Agent ajuste les quantités selon ton activité réelle.")
 
 # --- TAB 4 : AGENT AI ---
 with tab4:
