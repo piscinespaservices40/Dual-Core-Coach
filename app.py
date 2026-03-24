@@ -3,72 +3,122 @@ import pandas as pd
 import plotly.express as px
 
 # Configuration de la page
-st.set_page_config(page_title="Dual-Core Coach", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Dual-Core Coach AI", layout="wide", initial_sidebar_state="expanded")
 
-# --- STYLE VISUEL ---
+# --- STYLE VISUEL (CSS) ---
 st.markdown("""
 <style>
     .stApp { background: radial-gradient(circle at top, #1e1e2f 0%, #0d0d12 100%) !important; color: #e0e0e0 !important; }
     .stat-card { padding: 20px; border-radius: 20px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(0, 255, 204, 0.2); text-align: center; margin-bottom: 20px; backdrop-filter: blur(10px); }
-    .stat-card h2 { color: #00ffcc !important; font-size: 2.5rem !important; margin: 0; }
-    .stTabs [data-baseweb="tab-active"] { color: #00ffcc !important; border-bottom-color: #00ffcc !important; }
+    .stat-card h2 { color: #00ffcc !important; font-size: 2.2rem !important; margin: 0; }
+    .stTabs [data-baseweb="tab-active"] { color: #ff6600 !important; border-bottom-color: #ff6600 !important; }
+    .exercice-box { background: rgba(255, 102, 0, 0.05); border-left: 5px solid #ff6600; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- BARRE LATÉRALE ---
-with st.sidebar:
-    st.title("👤 Profil Athlète")
-    poids_actuel = st.number_input("Poids (kg)", value=75.0, step=0.1)
-    taille = st.number_input("Taille (cm)", value=180)
-    objectif = st.selectbox("Objectif", ["Prise de masse", "Maintien", "Sèche"])
-    
-    st.markdown("---")
-    st.subheader("📝 Noter ma séance")
-    nouveau_poids = st.number_input("Poids du jour (kg)", value=float(poids_actuel), step=0.1)
-    nouvelle_charge = st.number_input("Charge DC (kg)", value=65.0, step=2.5)
-    
-    if st.button("ENREGISTRER LES DONNÉES"):
-        st.session_state.historique_poids[-1] = nouveau_poids
-        st.session_state.charge_max[-1] = nouvelle_charge
-        st.success("Données enregistrées !")
-        st.rerun()
+# --- BASE DE DONNÉES EXERCICES ---
+exercices_db = {
+    "Pectoraux": ["Développé Couché", "Développé Incliné", "Écartés Poulie", "Dips", "Pompes Lestées", "Chest Press", "Développé Haltères", "Pull-over", "Écartés Haltères", "Machine convergente"],
+    "Dos": ["Tractions", "Tirage Poitrine", "Rowing Barre", "Tirage Horizontal", "Lumbaires", "Rowing Haltère", "Tirage Vertical Large", "Facepull", "Shrugs Barre", "Pull-down bras tendus"],
+    "Épaules": ["Développé Militaire", "Élévations Latérales", "Oiseau Poulie", "Développé Arnold", "Développé Haltères Assis", "Tirage Menton", "Élévations Frontales", "Reverse Pec Deck", "Push Press", "L-Fly"],
+    "Jambes (Quad/Ischios)": ["Squat", "Presse à Cuisses", "Leg Extension", "Leg Curl", "Fentes", "Hack Squat", "SDT Jambes Tendues", "Sissy Squat", "Step-up", "Bulgarian Split Squat"],
+    "Bras (Biceps/Triceps)": ["Curl Barre", "Curl Marteau", "Curl Incliné", "Extension Triceps Poulie", "Barre au Front", "Curl Larry Scott", "Dips Triceps", "Kickback", "Spider Curl", "Triceps Pushdown Corde"],
+    "Mollets/Fessiers": ["Mollets Debout", "Mollets Assis", "Hip Thrust", "Abducteurs", "Kickback Fessier", "Presse Mollets", "Glute Bridge", "Fentes Croisées", "Mollets à la Presse", "Donkey Calf Raise"],
+    "Abdos": ["Crunch", "Gainage", "Levé de Jambes", "Russian Twist", "Roulette Abdos", "Mountain Climbers", "Sit-ups", "Planche Latérale", "V-ups", "Leg Raise suspendu"],
+    "Cardio": ["Course à pied", "Vélo", "Rameur", "Corde à sauter", "Elliptique", "Natation", "HIIT", "Burpees", "Marche inclinée", "Assault Bike"]
+}
 
 # --- MÉMOIRE DE L'APP ---
-if 'historique_poids' not in st.session_state:
-    st.session_state.historique_poids = [74.5, 74.8, 75.2, 74.9, 74.5, 74.2, poids_actuel]
-if 'charge_max' not in st.session_state:
-    st.session_state.charge_max = [60, 60, 62.5, 62.5, 65, 65, 67.5]
+if 'historique_charges' not in st.session_state:
+    # On initialise un dictionnaire vide pour stocker les charges par exercice
+    st.session_state.historique_charges = {ex: [50, 52, 55, 55, 58, 60, 62] for muscle in exercices_db for ex in exercices_db[muscle]}
+
+if 'poids_corps' not in st.session_state:
+    st.session_state.poids_corps = [75.0, 74.8, 75.2, 74.9, 74.5, 74.2, 75.0]
 
 jours = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
-data_poids = pd.DataFrame({"Jour": jours, "Poids": st.session_state.historique_poids})
-data_entrainement = pd.DataFrame({"Jour": jours, "Charge (kg)": st.session_state.charge_max})
-data_nutrition = pd.DataFrame({"Jour": jours, "Proteines": [150, 165, 140, 170, 155, 130, 160], "Lipides": [70, 80, 75, 65, 85, 90, 70], "Glucides": [300, 350, 320, 280, 340, 400, 310]})
 
-# --- ONGLETS ---
-tab1, tab2, tab3 = st.tabs(["📊 Dashboard", "🏋️ Entraînement", "🍎 Nutrition"])
+# --- BARRE LATÉRALE (PROFIL UNIQUEMENT) ---
+with st.sidebar:
+    st.title("👤 Profil Athlète")
+    poids = st.number_input("Poids actuel (kg)", value=75.0, step=0.1)
+    taille = st.number_input("Taille (cm)", value=180)
+    objectif = st.selectbox("Objectif", ["Prise de masse", "Maintien", "Sèche"])
+    st.info(f"Mode : {objectif}")
 
+# --- CONTENU PRINCIPAL ---
+tab1, tab2, tab3, tab4 = st.tabs(["📊 Dashboard", "🏋️ Entraînement", "🍎 Nutrition", "🤖 Coach AI"])
+
+# --- TAB 1 : DASHBOARD ---
 with tab1:
-    st.title("Dual-Core Coach 🚀")
-    imc = round(poids_actuel / ((taille/100)**2), 1)
+    st.title("Performance Hub 🚀")
+    imc = round(poids / ((taille/100)**2), 1)
     c1, c2, c3 = st.columns(3)
     with c1: st.markdown(f'<div class="stat-card"><h3>IMC</h3><h2>{imc}</h2></div>', unsafe_allow_html=True)
     with c2: st.markdown('<div class="stat-card"><h3>CALORIES</h3><h2>2850</h2></div>', unsafe_allow_html=True)
-    with c3: st.markdown(f'<div class="stat-card"><h3>OBJECTIF</h3><h2>{objectif}</h2></div>', unsafe_allow_html=True)
+    with c3: st.markdown(f'<div class="stat-card"><h3>SÉANCES/SEM</h3><h2>5</h2></div>', unsafe_allow_html=True)
     
-    st.subheader("📉 Évolution du Poids (kg)")
-    fig_p = px.line(data_poids, x="Jour", y="Poids", markers=True, color_discrete_sequence=['#00ffcc'])
+    st.subheader("📉 Évolution du Poids")
+    fig_p = px.line(x=jours, y=st.session_state.poids_corps, markers=True, color_discrete_sequence=['#00ffcc'])
     fig_p.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white"))
     st.plotly_chart(fig_p, use_container_width=True)
 
+# --- TAB 2 : ENTRAÎNEMENT (LA PARTIE TECHNIQUE) ---
 with tab2:
-    st.title("🏋️ Ma Progression")
-    st.subheader("📈 Charge Max : Développé Couché")
-    fig_c = px.line(data_entrainement, x="Jour", y="Charge (kg)", markers=True, color_discrete_sequence=['#ff6600'])
-    fig_c.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white"))
-    st.plotly_chart(fig_c, use_container_width=True)
+    st.title("🏋️ Gestion des Séances")
+    
+    col_input, col_graph = st.columns([1, 2])
+    
+    with col_input:
+        st.subheader("📝 Noter ma Charge")
+        muscle_select = st.selectbox("Groupe Musculaire", list(exercices_db.keys()))
+        exercice_select = st.selectbox("Exercice", exercices_db[muscle_select])
+        
+        charge = st.number_input("Charge soulevée (kg)", value=60.0, step=2.5)
+        reps = st.slider("Nombre de répétitions", 1, 30, 10)
+        series = st.slider("Nombre de séries", 1, 10, 4)
+        
+        if st.button("VALIDER LA SÉANCE"):
+            # On ajoute la nouvelle charge à l'historique de l'exercice sélectionné
+            st.session_state.historique_charges[exercice_select].append(charge)
+            st.success(f"Enregistré : {exercice_select} à {charge}kg")
+            st.rerun()
 
+    with col_graph:
+        st.subheader(f"📈 Progression : {exercice_select}")
+        # On récupère les 7 dernières valeurs pour le graphique
+        data_ex = st.session_state.historique_charges[exercice_select][-7:]
+        fig_ex = px.area(x=jours, y=data_ex, markers=True, color_discrete_sequence=['#ff6600'])
+        fig_ex.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white"))
+        st.plotly_chart(fig_ex, use_container_width=True)
+        
+        st.write(f"**Détails séance :** {series} séries de {reps} répétitions")
+
+# --- TAB 3 : NUTRITION ---
 with tab3:
-    st.title("🍎 Nutrition")
-    fig_n = px.line(data_nutrition, x="Jour", y=["Proteines", "Lipides", "Glucides"], color_discrete_map={"Proteines": "#00ff00", "Lipides": "#ffff00", "Glucides": "#0000ff"})
+    st.title("🍎 Nutrition & Macros")
+    st.subheader("Suivi hebdomadaire")
+    data_nutri = pd.DataFrame({"Jour": jours, "Proteines": [150, 160, 155, 170, 150, 140, 160], "Lipides": [70, 75, 70, 65, 80, 85, 70], "Glucides": [300, 320, 310, 290, 330, 350, 300]})
+    fig_n = px.line(data_nutri, x="Jour", y=["Proteines", "Lipides", "Glucides"], color_discrete_map={"Proteines": "#00ff00", "Lipides": "#ffff00", "Glucides": "#0000ff"})
     fig_n.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white"), legend_font_color="white")
     st.plotly_chart(fig_n, use_container_width=True)
+
+# --- TAB 4 : AGENT AI ---
+with tab4:
+    st.title("🤖 Coach AI Personnel")
+    st.write("Pose tes questions à ton coach pour optimiser tes cycles de progression.")
+    
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+    if prompt := st.chat_input("Ex: Comment améliorer mon développé couché ?"):
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+        
+        with st.chat_message("assistant"):
+            st.markdown("Je suis prêt à analyser tes performances pour ajuster tes prochaines séances.")
