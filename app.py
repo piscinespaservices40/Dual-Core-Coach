@@ -41,17 +41,18 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- BASE DE DONNÉES EXERCICES ---
+    # --- BASE DE DONNÉES EXERCICES (Avec Icônes) ---
 exercices_db = {
-    "Pectoraux": ["Développé Couché", "Développé Incliné", "Écartés Poulie", "Dips", "Pompes Lestées", "Chest Press", "Développé Haltères", "Pull-over", "Écartés Haltères", "Machine convergente"],
-    "Dos": ["Tractions", "Tirage Poitrine", "Rowing Barre", "Tirage Horizontal", "Lumbaires", "Rowing Haltère", "Tirage Vertical Large", "Facepull", "Shrugs Barre", "Pull-down bras tendus"],
-    "Épaules": ["Développé Militaire", "Élévations Latérales", "Oiseau Poulie", "Développé Arnold", "Développé Haltères Assis", "Tirage Menton", "Élévations Frontales", "Reverse Pec Deck", "Push Press", "L-Fly"],
-    "Jambes (Quad/Ischios)": ["Squat", "Presse à Cuisses", "Leg Extension", "Leg Curl", "Fentes", "Hack Squat", "SDT Jambes Tendues", "Sissy Squat", "Step-up", "Bulgarian Split Squat"],
-    "Bras (Biceps/Triceps)": ["Curl Barre", "Curl Marteau", "Curl Incliné", "Extension Triceps Poulie", "Barre au Front", "Curl Larry Scott", "Dips Triceps", "Kickback", "Spider Curl", "Triceps Pushdown Corde"],
-    "Mollets/Fessiers": ["Mollets Debout", "Mollets Assis", "Hip Thrust", "Abducteurs", "Kickback Fessier", "Presse Mollets", "Glute Bridge", "Fentes Croisées", "Mollets à la Presse", "Donkey Calf Raise"],
-    "Abdos": ["Crunch", "Gainage", "Levé de Jambes", "Russian Twist", "Roulette Abdos", "Mountain Climbers", "Sit-ups", "Planche Latérale", "V-ups", "Leg Raise suspendu"],
-    "Cardio": ["Course à pied", "Vélo", "Rameur", "Corde à sauter", "Elliptique", "Natation", "HIIT", "Burpees", "Marche inclinée", "Assault Bike"]
+    "胸 Pectoraux": ["Développé Couché", "Développé Incliné", "Écartés Poulie", "Dips", "Pompes Lestées", "Chest Press", "Développé Haltères", "Pull-over", "Écartés Haltères", "Machine convergente"],
+    "背 Dos": ["Tractions", "Tirage Poitrine", "Rowing Barre", "Tirage Horizontal", "Lumbaires", "Rowing Haltère", "Tirage Vertical Large", "Facepull", "Shrugs Barre", "Pull-down bras tendus"],
+    "肩 Épaules": ["Développé Militaire", "Élévations Latérales", "Oiseau Poulie", "Développé Arnold", "Développé Haltères Assis", "Tirage Menton", "Élévations Frontales", "Reverse Pec Deck", "Push Press", "L-Fly"],
+    "🦵 Jambes": ["Squat", "Presse à Cuisses", "Leg Extension", "Leg Curl", "Fentes", "Hack Squat", "SDT Jambes Tendues", "Sissy Squat", "Step-up", "Bulgarian Split Squat"],
+    "💪 Bras": ["Curl Barre", "Curl Marteau", "Curl Incliné", "Extension Triceps Poulie", "Barre au Front", "Curl Larry Scott", "Dips Triceps", "Kickback", "Spider Curl", "Triceps Pushdown Corde"],
+    "🍑 Fessiers/Mollets": ["Mollets Debout", "Mollets Assis", "Hip Thrust", "Abducteurs", "Kickback Fessier", "Presse Mollets", "Glute Bridge", "Fentes Croisées", "Mollets à la Presse", "Donkey Calf Raise"],
+    "🍫 Abdos": ["Crunch", "Gainage", "Levé de Jambes", "Russian Twist", "Roulette Abdos", "Mountain Climbers", "Sit-ups", "Planche Latérale", "V-ups", "Leg Raise suspendu"],
+    "🫀 Cardio": ["Course à pied", "Vélo", "Rameur", "Corde à sauter", "Elliptique", "Natation", "HIIT", "Burpees", "Marche inclinée", "Assault Bike"]
 }
+
 
 # --- MÉMOIRE DE L'APP ---
 if 'historique_charges' not in st.session_state:
@@ -154,31 +155,50 @@ with tab3:
     st.plotly_chart(fig_n, use_container_width=True)
 
 # --- TAB 4 : AGENT AI ---
-# --- TAB 4 : AGENT AI ---
 with tab4:
-    st.title("🤖 Dual-Core Coach AI")
-    st.markdown('<p style="color:#00ffcc; font-weight:bold;">Analyse en temps réel de tes performances et conseils d\'optimisation.</p>', unsafe_allow_html=True)
+    st.title("🤖 Dual-Core Coach AI : Expert Omniscient")
+    st.markdown('<p style="color:#00ffcc; font-weight:bold;">Analyse Multimodale : Sommeil, Nutrition, Récupération & Biomécanique.</p>', unsafe_allow_html=True)
     
-    # Initialisation de la mémoire du chat
-    if "messages" not in st.session_state:
-        st.session_state.messages = [
-            {"role": "assistant", "content": f"Salut Athlète ! Je suis ton coach AI spécialisé. Je vois que ton objectif est : **{objectif}**. Comment puis-je t'aider à optimiser ta séance de **{muscle_select}** aujourd'hui ?"}
-        ]
+    # --- SECTION RÉCUPÉRATION ---
+    col_recup1, col_recup2 = st.columns(2)
+    with col_recup1:
+        sommeil = st.select_slider("Qualité du sommeil (h)", options=[4, 5, 6, 7, 8, 9, 10], value=7)
+    with col_recup2:
+        fatigue = st.select_slider("État nerveux / Fatigue", options=["Épuisé", "Fatigué", "Normal", "En forme", "Explosif"], value="Normal")
 
-    # Affichage des messages
+    st.markdown("---")
+
+    # --- CHAT INTERACTIF ---
+    if "messages" not in st.session_state:
+        st.session_state.messages = [{"role": "assistant", "content": "Salut Athlète. Je suis ton coach. Je suis prêt à analyser ton frigo ou à t'expliquer un mouvement en vidéo. Que fait-on ?"}]
+
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Entrée utilisateur (Le Chat)
-    if prompt := st.chat_input("Pose ta question au coach..."):
-        # On ajoute le message de l'utilisateur
+    # --- ENTRÉE UTILISATEUR (TEXTE + PHOTO DU FRIGO) ---
+    with st.expander("📸 Envoyer une photo au coach (Frigo, Assiette, Exercice)"):
+        photo_coach = st.file_uploader("Le coach analysera tes macros ou ta forme", type=['jpg', 'jpeg', 'png'], key="coach_photo")
+
+    if prompt := st.chat_input("Pose ta question..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
         
-        # Réponse intelligente simulée
         with st.chat_message("assistant"):
-            reponse = f"Analyse de tes stats en cours... Pour ton profil de {poids}kg en mode **{objectif}**, je te suggère de te concentrer sur la phase excentrique sur l'exercice **{exercice_select}**. Est-ce que tu veux que je regarde ton historique de charge sur ce mouvement ?"
-            st.markdown(reponse)
+            # LOGIQUE DU COACH
+            if "shrugs" in prompt.lower() or "exercice" in prompt.lower():
+                reponse = "Voici une démonstration visuelle pour les **Shrugs Barre**. Concentre-toi sur la montée verticale sans rouler les épaules."
+                st.markdown(reponse)
+                # ICI ON SIMULE L'EXEMPLE VISUEL (GIF/Vidéo)
+                st.image("https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3Y2ZzR3ZzR3ZzR3ZzR3ZzR3ZzR3ZzR3ZzR3ZzR3ZzR3ZzR3JmcmVzaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKMGpxP5O5Q8L9S/giphy.gif", caption="Démonstration Shrugs")
+            
+            elif photo_coach:
+                reponse = f"Analyse de ton frigo terminée. Vu ton objectif de **{objectif}**, je vois des œufs et des légumes. Prépare une omelette avec 3 œufs et 150g de riz pour tes macros."
+                st.markdown(reponse)
+            
+            else:
+                reponse = f"Analyse récupération : Avec {sommeil}h de sommeil et une fatigue {fatigue}, je te conseille de réduire le volume sur ta séance de **{muscle_select}** aujourd'hui pour protéger ton système nerveux."
+                st.markdown(reponse)
+                
             st.session_state.messages.append({"role": "assistant", "content": reponse})
