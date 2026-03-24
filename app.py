@@ -8,54 +8,33 @@ st.set_page_config(page_title="Dual-Core Coach AI", layout="wide", initial_sideb
 # --- STYLE VISUEL (CSS) ---
 st.markdown("""
 <style>
-    /* Fond global */
     .stApp { background: radial-gradient(circle at top, #1e1e2f 0%, #0d0d12 100%) !important; }
     
-    /* TOUT le texte par défaut en blanc cassé pour la lisibilité */
-    html, body, [class*="st-"] {
-        color: #ffffff !important;
-        font-family: 'Inter', sans-serif;
-    }
+    /* Texte global */
+    html, body, [class*="st-"] { color: #ffffff !important; }
 
-    /* Titres et Sous-titres en Bleu Néon */
-    h1, h2, h3, .stSubheader {
-        color: #00ffcc !important;
-        text-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
-    }
+    /* Titres Bleu Néon */
+    h1, h2, h3, .stSubheader { color: #00ffcc !important; text-shadow: 0 0 10px rgba(0, 255, 204, 0.3); }
 
-    /* Labels des champs (Poids, Taille, etc.) */
-    label, [data-testid="stWidgetLabel"] p {
-        color: #00ffcc !important;
+    /* Labels des formulaires */
+    label, [data-testid="stWidgetLabel"] p { color: #00ffcc !important; font-weight: bold !important; }
+
+    /* --- FIX DU BOUTON VALIDER --- */
+    div.stButton > button {
+        background-color: #ff6600 !important;
+        color: white !important; /* Force le texte en blanc */
+        border: none !important;
         font-weight: bold !important;
-        font-size: 1.1rem !important;
+        padding: 10px 20px !important;
+    }
+    div.stButton > button:hover {
+        background-color: #ff8533 !important;
+        color: white !important;
     }
 
-    /* Forcer le texte des tableaux et de l'historique en blanc */
-    .stTable, table, th, td {
-        color: #ffffff !important;
-        background-color: rgba(255, 255, 255, 0.05) !important;
-    }
-
-    /* Correction spécifique pour le menu Nutrition (Matin, Midi, Soir) */
-    .stMarkdown p, .stMarkdown strong {
-        color: #e0e0e0 !important;
-    }
-
-    /* Cartes de stats (Calories, Prot, etc.) */
-    .stat-card {
-        padding: 20px;
-        border-radius: 20px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(0, 255, 204, 0.2);
-        text-align: center;
-    }
-    .stat-card h3 { color: #ffffff !important; font-size: 1rem !important; }
-    .stat-card h2 { color: #00ffcc !important; font-size: 2rem !important; }
-
-    /* Boutons Radio (Jour/Semaine/Mois) */
-    div[data-testid="stRadio"] label p {
-        color: #00ffcc !important;
-    }
+    /* Fix pour les tableaux */
+    .stTable, table { color: white !important; }
+    thead tr th { color: #00ffcc !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -221,11 +200,19 @@ with tab3:
     else:
         st.info("Aucun repas enregistré pour le moment. Clique sur 'Valider' pour commencer ton historique.")
 
-    # --- 4. RÉPARTITION VISUELLE ---
+    # --- 4. RÉPARTITION VISUELLE (Légende corrigée) ---
     with st.expander("📊 Voir la répartition théorique des macros"):
-        df_macro = pd.DataFrame({"Macro": ["P", "L", "G"], "Grammes": [prot, lip, glu]})
-        fig_pie = px.pie(df_macro, values="Grammes", names="Macro", hole=0.6, color_discrete_sequence=['#00ffcc', '#ffff00', '#ff6600'])
-        fig_pie.update_layout(paper_bgcolor='rgba(0,0,0,0)', font=dict(color="white"))
+        df_macro = pd.DataFrame({"Macro": ["Protéines", "Lipides", "Glucides"], "Grammes": [prot, lip, glu]})
+        fig_pie = px.pie(df_macro, values="Grammes", names="Macro", hole=0.6, 
+                         color_discrete_map={"Protéines":"#00ffcc", "Lipides":"#ffff00", "Glucides":"#ff6600"})
+        
+        # C'est ici qu'on rend la légende blanche
+        fig_pie.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(color="white"),
+            legend=dict(font=dict(color="white")), # Légende en blanc
+            showlegend=True
+        )
         st.plotly_chart(fig_pie, use_container_width=True)
 
 # --- TAB 4 : AGENT AI ---
