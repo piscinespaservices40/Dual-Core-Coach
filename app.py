@@ -79,20 +79,45 @@ with tab2:
         series = st.slider("Nombre de séries", 1, 10, 4)
         
         if st.button("VALIDER LA SÉANCE"):
-            # On ajoute la nouvelle charge à l'historique de l'exercice sélectionné
             st.session_state.historique_charges[exercice_select].append(charge)
             st.success(f"Enregistré : {exercice_select} à {charge}kg")
             st.rerun()
 
     with col_graph:
-        st.subheader(f"📈 Progression : {exercice_select}")
-        # On récupère les 7 dernières valeurs pour le graphique
-        data_ex = st.session_state.historique_charges[exercice_select][-7:]
-        fig_ex = px.area(x=jours, y=data_ex, markers=True, color_discrete_sequence=['#ff6600'])
-        fig_ex.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white"))
-        st.plotly_chart(fig_ex, use_container_width=True)
+        # --- SÉLECTEUR DE PÉRIODE ---
+        periode = st.radio("Vue de la progression :", ["Jour", "Semaine", "Mois"], horizontal=True)
         
-        st.write(f"**Détails séance :** {series} séries de {reps} répétitions")
+        st.subheader(f"📈 Progression : {exercice_select}")
+        
+        # Récupération des données
+        base_data = st.session_state.historique_charges[exercice_select]
+        
+        if periode == "Jour":
+            # On affiche les 7 derniers jours
+            y_data = base_data[-7:]
+            x_label = jours
+        elif periode == "Semaine":
+            # On simule une vue par semaine (moyenne des points)
+            y_data = base_data[-28:] # On prend plus de données
+            x_label = [f"Sem {i+1}" for i in range(len(y_data)//4 + 1)][-7:]
+            y_data = y_data[::4] # On prend un point toutes les 4 séances pour l'exemple
+        else: # Mois
+            # On simule une vue annuelle/mensuelle
+            y_data = [base_data[0], base_data[-1]] # Début vs Fin
+            x_label = ["Mois Précédent", "Mois Actuel"]
+
+        fig_ex = px.area(x=x_label, y=y_data, markers=True, color_discrete_sequence=['#ff6600'])
+        
+        fig_ex.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)', 
+            plot_bgcolor='rgba(0,0,0,0)', 
+            font=dict(color="white"),
+            xaxis_title=f"Période ({periode})",
+            yaxis_title="Charge (kg)"
+        )
+        
+        st.plotly_chart(fig_ex, use_container_width=True)
+        st.write(f"**Focus actuel :** {series} séries de {reps} répétitions sur {exercice_select}")
 
 # --- TAB 3 : NUTRITION ---
 with tab3:
