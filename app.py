@@ -46,7 +46,7 @@ with st.sidebar:
     # Formulaire pour la muscu (ex: Développé Couché)
     nouvelle_charge = st.number_input("Charge DC (kg)", value=65.0, step=2.5)
     
-    if st.button("Enregistrer les données"):
+if st.button("Enregistrer les données"):
     # On met à jour la mémoire (le dernier jour de la semaine)
     st.session_state.historique_poids[-1] = nouveau_poids
     st.session_state.charge_max[-1] = nouvelle_charge
