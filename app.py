@@ -8,33 +8,53 @@ st.set_page_config(page_title="Dual-Core Coach AI", layout="wide", initial_sideb
 # --- STYLE VISUEL (CSS) ---
 st.markdown("""
 <style>
-    .stApp { background: radial-gradient(circle at top, #1e1e2f 0%, #0d0d12 100%) !important; }
-    
-    /* Texte global */
-    html, body, [class*="st-"] { color: #ffffff !important; }
+    /* 1. FORCE LE FOND GLOBAL */
+    .stApp { background-color: #0d0d12 !important; }
 
-    /* Titres Bleu Néon */
-    h1, h2, h3, .stSubheader { color: #00ffcc !important; text-shadow: 0 0 10px rgba(0, 255, 204, 0.3); }
-
-    /* Labels des formulaires */
-    label, [data-testid="stWidgetLabel"] p { color: #00ffcc !important; font-weight: bold !important; }
-
-    /* --- FIX DU BOUTON VALIDER --- */
-    div.stButton > button {
-        background-color: #ff6600 !important;
-        color: white !important; /* Force le texte en blanc */
-        border: none !important;
-        font-weight: bold !important;
-        padding: 10px 20px !important;
+    /* 2. SIDEBAR : VISIBILITÉ TOTALE */
+    section[data-testid="stSidebar"] {
+        background-color: #111116 !important;
+        border-right: 1px solid #333;
     }
-    div.stButton > button:hover {
-        background-color: #ff8533 !important;
+    section[data-testid="stSidebar"] * {
+        color: #00ffcc !important; /* Force le bleu néon sur tout le texte sidebar */
+    }
+    section[data-testid="stSidebar"] input {
+        background-color: #1e1e26 !important;
         color: white !important;
     }
 
-    /* Fix pour les tableaux */
-    .stTable, table { color: white !important; }
-    thead tr th { color: #00ffcc !important; }
+    /* 3. TEXTE GLOBAL DU CORPS DE PAGE */
+    .main .stMarkdown p, .main label, .main span {
+        color: #ffffff !important;
+    }
+
+    /* 4. EXPANDERS (Menu déroulant Macros) */
+    .stExpander details summary p {
+        color: #00ffcc !important; /* Titre de l'expander en bleu néon */
+        font-weight: bold !important;
+        font-size: 1.1rem !important;
+    }
+    .stExpander {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid #333 !important;
+    }
+
+    /* 5. TITRES */
+    h1, h2, h3 { color: #00ffcc !important; }
+
+    /* 6. BOUTON VALIDER (ORANGE) */
+    div.stButton > button {
+        background-color: #ff6600 !important;
+        color: white !important;
+        font-weight: bold !important;
+        border: none !important;
+        width: 100% !important;
+    }
+    
+    /* 7. TABLEAUX HISTORIQUE */
+    .stTable td { color: white !important; }
+    .stTable th { color: #00ffcc !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -200,18 +220,18 @@ with tab3:
     else:
         st.info("Aucun repas enregistré pour le moment. Clique sur 'Valider' pour commencer ton historique.")
 
-    # --- 4. RÉPARTITION VISUELLE (Légende corrigée) ---
-    with st.expander("📊 Voir la répartition théorique des macros"):
+    # --- 4. RÉPARTITION VISUELLE ---
+    with st.expander("📊 CLIQUE ICI POUR VOIR LA RÉPARTITION DES MACROS"):
         df_macro = pd.DataFrame({"Macro": ["Protéines", "Lipides", "Glucides"], "Grammes": [prot, lip, glu]})
         fig_pie = px.pie(df_macro, values="Grammes", names="Macro", hole=0.6, 
                          color_discrete_map={"Protéines":"#00ffcc", "Lipides":"#ffff00", "Glucides":"#ff6600"})
         
-        # C'est ici qu'on rend la légende blanche
         fig_pie.update_layout(
             paper_bgcolor='rgba(0,0,0,0)',
-            font=dict(color="white"),
-            legend=dict(font=dict(color="white")), # Légende en blanc
-            showlegend=True
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color="#ffffff", size=14),
+            showlegend=True,
+            legend=dict(font=dict(color="#ffffff")) 
         )
         st.plotly_chart(fig_pie, use_container_width=True)
 
