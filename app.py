@@ -46,7 +46,11 @@ data_nutrition = pd.DataFrame({
     "Glucides": [300, 350, 320, 280, 340, 400, 310]
 })
 tab1, tab2, tab3 = st.tabs(["📊 Dashboard", "🏋️ Entraînement", "🍎 Nutrition"])
-
+# Données pour le suivi du poids
+data_poids = pd.DataFrame({
+    "Jour": jours,
+    "Poids": [poids - 0.5, poids - 0.3, poids, poids - 0.2, poids - 0.6, poids - 0.8, poids]
+})
 # --- TAB 1 : DASHBOARD ---
 with tab1:
     st.title("Dual-Core Coach 🚀")
@@ -55,7 +59,26 @@ with tab1:
     with c1: st.markdown(f'<div class="stat-card"><h3>IMC</h3><h2>{imc}</h2></div>', unsafe_allow_html=True)
     with c2: st.markdown(f'<div class="stat-card"><h3>CALORIES</h3><h2>2850</h2></div>', unsafe_allow_html=True)
     with c3: st.markdown(f'<div class="stat-card"><h3>OBJECTIF</h3><h2>{objectif}</h2></div>', unsafe_allow_html=True)
+st.markdown("---")
+    st.subheader("📉 Évolution du Poids (kg)")
 
+    # Création du graphique de poids (couleur néon comme ton IMC)
+    fig_poids = px.line(data_poids, x="Jour", y="Poids", 
+                        markers=True,
+                        color_discrete_sequence=['#00ffcc']) 
+
+    # Style pour fond sombre
+    fig_poids.update_layout(
+        paper_bgcolor='rgba(0,0,0,0)', 
+        plot_bgcolor='rgba(0,0,0,0)', 
+        font=dict(color="white"),
+        hovermode="x unified"
+    )
+    
+    # On ajuste l'axe Y pour que la courbe soit jolie
+    fig_poids.update_yaxes(range=[poids-2, poids+2])
+
+    st.plotly_chart(fig_poids, use_container_width=True)
 # --- TAB 2 : ENTRAÎNEMENT ---
 with tab2:
     col_left, col_right = st.columns([1.5, 1])
