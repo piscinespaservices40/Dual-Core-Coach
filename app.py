@@ -47,11 +47,11 @@ with st.sidebar:
     nouvelle_charge = st.number_input("Charge DC (kg)", value=65.0, step=2.5)
     
     if st.button("Enregistrer les données"):
-        # On met à jour la mémoire (le dernier jour de la semaine)
-        st.session_state.historique_poids[-1] = nouveau_poids
-        st.session_state.charge_max[-1] = nouvelle_charge
-        st.success("Données enregistrées !")
-        st.rerun()
+    # On met à jour la mémoire (le dernier jour de la semaine)
+    st.session_state.historique_poids[-1] = nouveau_poids
+    st.session_state.charge_max[-1] = nouvelle_charge
+    st.success("Données enregistrées !")
+    st.rerun()
 # Données pour les graphiques
 # --- MÉMOIRE DE L'APP (Session State) ---
 if 'historique_poids' not in st.session_state:
