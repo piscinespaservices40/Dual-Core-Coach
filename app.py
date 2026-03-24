@@ -45,6 +45,11 @@ data_nutrition = pd.DataFrame({
     "Lipides": [70, 80, 75, 65, 85, 90, 70],
     "Glucides": [300, 350, 320, 280, 340, 400, 310]
 })
+# Données pour le suivi du poids
+data_poids = pd.DataFrame({
+    "Jour": jours,
+    "Poids": [poids - 0.5, poids - 0.3, poids, poids - 0.2, poids - 0.6, poids - 0.8, poids]
+})
 tab1, tab2, tab3 = st.tabs(["📊 Dashboard", "🏋️ Entraînement", "🍎 Nutrition"])
 
 # --- TAB 1 : DASHBOARD ---
