@@ -8,11 +8,36 @@ st.set_page_config(page_title="Dual-Core Coach AI", layout="wide", initial_sideb
 # --- STYLE VISUEL (CSS) ---
 st.markdown("""
 <style>
+    /* Fond de l'application */
     .stApp { background: radial-gradient(circle at top, #1e1e2f 0%, #0d0d12 100%) !important; color: #e0e0e0 !important; }
+    
+    /* Titres des cartes de stats */
     .stat-card { padding: 20px; border-radius: 20px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(0, 255, 204, 0.2); text-align: center; margin-bottom: 20px; backdrop-filter: blur(10px); }
     .stat-card h2 { color: #00ffcc !important; font-size: 2.2rem !important; margin: 0; }
+    
+    /* --- COULEUR BLEU NÉON POUR TOUS LES LABELS --- */
+    label, .stMarkdown p, .stSelectbox label, .stSlider label, .stNumberInput label, [data-testid="stWidgetLabel"] {
+        color: #00ffcc !important;
+        font-weight: bold !important;
+        text-shadow: 0 0 5px rgba(0, 255, 204, 0.5);
+    }
+
+    /* Couleur pour les boutons radio (Jour, Semaine, Mois) */
+    div[data-testid="stRadio"] label {
+        color: #00ffcc !important;
+    }
+
+    /* Style des onglets */
     .stTabs [data-baseweb="tab-active"] { color: #ff6600 !important; border-bottom-color: #ff6600 !important; }
-    .exercice-box { background: rgba(255, 102, 0, 0.05); border-left: 5px solid #ff6600; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
+    
+    /* Bouton Valider personnalisé */
+    div.stButton > button {
+        background-color: #ff6600 !important;
+        color: white !important;
+        border-radius: 10px;
+        border: none;
+        width: 100%;
+    }
 </style>
 """, unsafe_allow_html=True)
 
